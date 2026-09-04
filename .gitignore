@@ -1,0 +1,18 @@
+# Local environment secrets
+.env
+
+# Transfer packages and runtime uploads
+/upload/
+/uploads/*
+!/uploads/.htaccess
+!/uploads/workplan/
+/uploads/workplan/*
+!/uploads/workplan/index.html
+
+# Common local/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+

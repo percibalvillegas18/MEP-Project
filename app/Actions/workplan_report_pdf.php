@@ -1,0 +1,8 @@
+<?php
+require_once dirname(__DIR__, 2) . '/includes/auth.php'; require_login();
+$id=(int)($_GET['id']??0); if(!$id){flash('error','No work plan record specified.');redirect('workplan.php');}
+$st=$pdo->prepare("SELECT w.*,p.project_name,p.location,p.client,u.name responsible_name FROM workplan w JOIN projects p ON p.id=w.project_id LEFT JOIN users u ON u.id=w.responsible_user_id WHERE w.id=?");$st->execute([$id]);$rec=$st->fetch();
+if(!$rec){flash('error','Work plan record not found.');redirect('workplan.php');} require_project_permission($pdo,(int)$rec['project_id'],'report.export');
+$afterSt=$pdo->prepare("SELECT file_name FROM workplan_photos WHERE workplan_id=? ORDER BY sort_order,id LIMIT 5");$afterSt->execute([$id]);$afterPhotos=$afterSt->fetchAll(PDO::FETCH_COLUMN);if(!$afterPhotos&&!empty($rec['work_status_image_after']))$afterPhotos=[$rec['work_status_image_after']];
+$masRef=$masMat=$activity='';if(!empty($rec['mas_submittal_id'])){$q=$pdo->prepare("SELECT submittal_reference,material_description FROM submittals WHERE id=?");$q->execute([$rec['mas_submittal_id']]);if($m=$q->fetch()){$masRef=$m['submittal_reference'];$masMat=$m['material_description'];}}if(!empty($rec['progress_id'])){$q=$pdo->prepare("SELECT task FROM project_progress WHERE id=?");$q->execute([$rec['progress_id']]);$activity=(string)$q->fetchColumn();}
+$duration='—';if($rec['planned_start']&&$rec['planned_finish']){try{$duration=(new DateTime($rec['planned_start']))->diff(new DateTime($rec['planned_finish']))->days.' day(s)';}catch(Exception $ex){}}function photo_url(string $name):string{return evidence_url($name);}$before=$rec['work_status_image_before']??'';
